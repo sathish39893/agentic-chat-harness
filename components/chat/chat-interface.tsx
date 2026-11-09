@@ -91,6 +91,7 @@ export function ChatInterface() {
     if (!input.trim() && attachments.length === 0) return;
 
     const currentText = input.trim();
+    const currentAttachments = [...attachments];
     setInput('');
     setAttachments([]);
 
@@ -98,9 +99,18 @@ export function ChatInterface() {
       textareaRef.current.style.height = 'auto';
     }
 
-    void sendMessage({
-      text: currentText,
-    });
+    void sendMessage(
+      {
+        text: currentText,
+      },
+      {
+        body: {
+          modelId: selectedModelId,
+          attachments: currentAttachments,
+          forceFallbackSandbox,
+        },
+      }
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

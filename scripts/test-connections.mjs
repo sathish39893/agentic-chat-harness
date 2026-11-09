@@ -71,3 +71,4 @@ if (dbUrl) {
 console.log('\n========================================');
 console.log(' Diagnostics completed.');
 console.log('========================================\n');
+

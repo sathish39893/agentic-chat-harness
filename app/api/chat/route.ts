@@ -42,6 +42,21 @@ export async function POST(req: Request) {
     // 3. Convert client UIMessages to standard ModelMessages for streamText
     const modelMessages = await convertToModelMessages(messages);
 
+    // Multimodal Vision Injection for Vision-capable models
+    if (attachments && attachments.length > 0) {
+      const lastMsg = modelMessages[modelMessages.length - 1];
+      if (lastMsg && lastMsg.role === 'user' && Array.isArray(lastMsg.content)) {
+        for (const att of attachments) {
+          if (att.contentType && att.contentType.startsWith('image/')) {
+            (lastMsg.content as any[]).push({
+              type: 'image',
+              image: att.url,
+            });
+          }
+        }
+      }
+    }
+
     // 4. Multi-step Execution with Vercel AI SDK
     const result = streamText({
       model,
