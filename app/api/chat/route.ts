@@ -1,4 +1,4 @@
-import { streamText, stepCountIs } from 'ai';
+import { streamText, stepCountIs, convertToModelMessages } from 'ai';
 import { resolveModel, DEFAULT_MODEL_ID } from '@/lib/agent/models';
 import { createHarnessTools } from '@/lib/agent/tools';
 import { AgentHarness } from '@/lib/agent/harness';
@@ -39,13 +39,16 @@ export async function POST(req: Request) {
       forceFallbackSandbox,
     });
 
-    // 3. Multi-step Execution with Vercel AI SDK
+    // 3. Convert client UIMessages to standard ModelMessages for streamText
+    const modelMessages = await convertToModelMessages(messages);
+
+    // 4. Multi-step Execution with Vercel AI SDK
     const result = streamText({
       model,
       system: systemPrompt,
-      messages,
+      messages: modelMessages,
       tools,
-      stopWhen: stepCountIs(8), // Step count limit in AI SDK v7
+      stopWhen: stepCountIs(8),
       onFinish: async (event) => {
         try {
           await AgentHarness.postTurnConsolidation({
@@ -58,8 +61,13 @@ export async function POST(req: Request) {
       },
     });
 
-    // 4. Return UI message stream response
-    return result.toUIMessageStreamResponse();
+    // 5. Return UI message stream response with error logging
+    return result.toUIMessageStreamResponse({
+      onError: (err) => {
+        console.error('[STREAM ERROR CAUGHT]:', err);
+        return err instanceof Error ? err.message : 'An error occurred during streaming.';
+      },
+    });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal Server Error';
     console.error('API /api/chat error:', error);
