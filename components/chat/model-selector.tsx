@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { ModelOption } from '@/lib/types';
-import { ChevronDown, Check, Sparkles, Brain, Eye, Cpu, Zap } from 'lucide-react';
+import { ChevronDown, Check, Sparkles, Brain, Eye, Cpu, Zap, Tag } from 'lucide-react';
 
 interface ModelSelectorProps {
   models: ModelOption[];
@@ -58,6 +58,24 @@ export function ModelSelector({
           dot: 'bg-purple-400',
           border: 'hover:border-purple-500/40',
         };
+      case 'mistral':
+        return {
+          badge: 'bg-orange-500/10 text-orange-300 border-orange-500/20',
+          dot: 'bg-orange-400',
+          border: 'hover:border-orange-500/40',
+        };
+      case 'meta':
+        return {
+          badge: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',
+          dot: 'bg-indigo-400',
+          border: 'hover:border-indigo-500/40',
+        };
+      default:
+        return {
+          badge: 'bg-zinc-800 text-zinc-300 border-zinc-700',
+          dot: 'bg-zinc-400',
+          border: 'hover:border-zinc-500',
+        };
     }
   };
 
@@ -73,37 +91,47 @@ export function ModelSelector({
       >
         <span className={`w-2 h-2 rounded-full ${currentTheme.dot} shadow-xs`} />
         <span className="text-zinc-100 font-semibold">{selectedModel.name}</span>
-        
-        <span className={`hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] uppercase font-mono border ${currentTheme.badge}`}>
+
+        {selectedModel.pricing && (
+          <span className="hidden sm:inline-block px-1.5 py-0.2 rounded text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+            {selectedModel.pricing.inputPerMillion}/M
+          </span>
+        )}
+
+        <span
+          className={`hidden md:inline-block px-1.5 py-0.5 rounded text-[10px] uppercase font-mono border ${currentTheme.badge}`}
+        >
           {selectedModel.provider}
         </span>
 
         {hasGateway && (
-          <span className="hidden md:inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-md font-mono">
+          <span className="hidden lg:inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-md font-mono">
             <Zap className="w-2.5 h-2.5 fill-current" />
             Gateway
           </span>
         )}
 
-        <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
       </button>
 
       {/* Popover Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-zinc-900/95 backdrop-blur-2xl border border-white/10 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-0 mt-2 w-84 rounded-2xl bg-zinc-900/95 backdrop-blur-2xl border border-white/10 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
           <div className="px-3 py-2 border-b border-white/5 flex items-center justify-between">
             <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-              Select Intelligence Model
+              Budget & Agentic Models
             </span>
-            {hasGateway && (
-              <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Vercel AI Gateway
-              </span>
-            )}
+            <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Verified on AI Gateway
+            </span>
           </div>
 
-          <div className="mt-1 space-y-1 max-h-80 overflow-y-auto">
+          <div className="mt-1 space-y-1 max-h-84 overflow-y-auto">
             {models.map((model) => {
               const isSelected = model.id === selectedModelId;
               const theme = getProviderTheme(model.provider);
@@ -128,14 +156,19 @@ export function ModelSelector({
                       <span className="font-semibold text-xs text-zinc-100 group-hover:text-white">
                         {model.name}
                       </span>
-                      <span className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-mono border ${theme.badge}`}>
+                      <span
+                        className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-mono border ${theme.badge}`}
+                      >
                         {model.provider}
                       </span>
+                      {model.pricing && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                          {model.pricing.inputPerMillion}/M
+                        </span>
+                      )}
                     </div>
-                    <p className="text-[11px] text-zinc-400 line-clamp-1">
-                      {model.description}
-                    </p>
-                    <div className="flex items-center gap-1 pt-0.5">
+                    <p className="text-[11px] text-zinc-400 line-clamp-1">{model.description}</p>
+                    <div className="flex items-center gap-1.5 pt-0.5">
                       {model.supportsVision && (
                         <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded bg-zinc-800/80 text-[10px] text-sky-400 border border-white/5">
                           <Eye className="w-2.5 h-2.5" />

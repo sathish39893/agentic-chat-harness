@@ -29,6 +29,7 @@ import {
   Zap,
   BarChart3,
   Layers,
+  LogOut,
 } from 'lucide-react';
 
 export function ChatInterface() {
@@ -137,6 +138,15 @@ export function ChatInterface() {
     setTimeout(() => setCopiedMessageId(null), 2000);
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/login';
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-[#090a0f] text-zinc-100 font-sans antialiased relative overflow-hidden selection:bg-blue-500/30 selection:text-blue-200">
       {/* Ambient gradient lighting */}
@@ -193,11 +203,22 @@ export function ChatInterface() {
           <button
             type="button"
             onClick={() => setIsMemoryModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/25 transition-all shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/25 transition-all shadow-xs cursor-pointer"
             title="Inspect Neon pgvector memories"
           >
             <Database className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Neon Memory</span>
+          </button>
+
+          {/* Logout Button */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs text-zinc-400 hover:text-rose-300 hover:bg-rose-950/20 border border-white/10 hover:border-rose-500/30 transition-all shadow-xs cursor-pointer"
+            title="Sign out of workspace"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Sign Out</span>
           </button>
         </div>
       </header>

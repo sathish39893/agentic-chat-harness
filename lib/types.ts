@@ -1,10 +1,14 @@
 export interface ModelOption {
   id: string;
   name: string;
-  provider: 'anthropic' | 'openai' | 'google' | 'deepseek';
+  provider: 'anthropic' | 'openai' | 'google' | 'deepseek' | 'mistral' | 'meta';
   description: string;
   supportsVision: boolean;
   supportsReasoning: boolean;
+  pricing?: {
+    inputPerMillion: string;
+    outputPerMillion: string;
+  };
 }
 
 export interface AttachmentItem {
@@ -38,4 +42,3 @@ export interface MemoryRecord {
   metadata?: Record<string, unknown>;
   createdAt: string;
 }
-

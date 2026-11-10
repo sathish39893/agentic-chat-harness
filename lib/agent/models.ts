@@ -4,66 +4,98 @@ import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
 import { ModelOption } from '@/lib/types';
 
+/**
+ * Curated list of cheaper, high-performance models verified on Vercel AI Gateway (https://vercel.com/ai-gateway/models)
+ * that natively support tool calling (agentic harness), multimodal inputs, and/or reasoning.
+ */
 export const AVAILABLE_MODELS: ModelOption[] = [
-  {
-    id: 'anthropic/claude-3-5-sonnet',
-    name: 'Claude 3.5 Sonnet',
-    provider: 'anthropic',
-    description: 'Anthropic state-of-the-art coding and agentic reasoning model.',
-    supportsVision: true,
-    supportsReasoning: false,
-  },
-  {
-    id: 'anthropic/claude-3-7-sonnet',
-    name: 'Claude 3.7 Sonnet (Hybrid Reasoning)',
-    provider: 'anthropic',
-    description: 'Advanced reasoning and agentic execution with thinking traces.',
-    supportsVision: true,
-    supportsReasoning: true,
-  },
-  {
-    id: 'openai/gpt-4o',
-    name: 'GPT-4o',
-    provider: 'openai',
-    description: 'OpenAI flagship multimodal omni model for tools and vision.',
-    supportsVision: true,
-    supportsReasoning: false,
-  },
   {
     id: 'openai/gpt-4o-mini',
     name: 'GPT-4o mini',
     provider: 'openai',
-    description: 'Fast, lightweight and cost-efficient agent model.',
+    description: 'OpenAI flagship budget agent model with reliable tool calling and vision.',
     supportsVision: true,
     supportsReasoning: false,
+    pricing: {
+      inputPerMillion: '$0.15',
+      outputPerMillion: '$0.60',
+    },
   },
   {
-    id: 'google/gemini-2.0-flash',
-    name: 'Gemini 2.0 Flash',
+    id: 'google/gemini-2.5-flash-lite',
+    name: 'Gemini 2.5 Flash Lite',
     provider: 'google',
-    description: 'Next-gen high speed multimodal model from Google.',
+    description: 'Google ultra-fast budget model with multimodal vision, reasoning, and tool use.',
     supportsVision: true,
     supportsReasoning: true,
+    pricing: {
+      inputPerMillion: '$0.10',
+      outputPerMillion: '$0.40',
+    },
   },
   {
-    id: 'deepseek/deepseek-chat',
-    name: 'DeepSeek V3',
-    provider: 'deepseek',
-    description: 'Powerful open-weights model routed through Vercel AI Gateway.',
-    supportsVision: false,
-    supportsReasoning: false,
+    id: 'anthropic/claude-haiku-5.5',
+    name: 'Claude Haiku 5.5',
+    provider: 'anthropic',
+    description: 'Anthropic high-speed, budget-friendly agent model with reasoning and tools.',
+    supportsVision: true,
+    supportsReasoning: true,
+    pricing: {
+      inputPerMillion: '$0.10',
+      outputPerMillion: '$0.50',
+    },
   },
   {
-    id: 'deepseek/deepseek-reasoner',
-    name: 'DeepSeek R1',
+    id: 'openai/gpt-5-nano',
+    name: 'GPT-5 nano',
+    provider: 'openai',
+    description: 'Ultra-low cost frontier model with native tool execution and vision reasoning.',
+    supportsVision: true,
+    supportsReasoning: true,
+    pricing: {
+      inputPerMillion: '$0.05',
+      outputPerMillion: '$0.40',
+    },
+  },
+  {
+    id: 'deepseek/deepseek-v4-flash',
+    name: 'DeepSeek V4 Flash',
     provider: 'deepseek',
-    description: 'Chain-of-thought mathematical reasoning model.',
+    description: 'Ultra-low cost reasoning and coding model with function calling.',
     supportsVision: false,
     supportsReasoning: true,
+    pricing: {
+      inputPerMillion: '$0.13',
+      outputPerMillion: '$0.26',
+    },
+  },
+  {
+    id: 'mistral/mistral-small',
+    name: 'Mistral Small',
+    provider: 'mistral',
+    description: 'Efficient multimodal open-weights model with function calling.',
+    supportsVision: true,
+    supportsReasoning: false,
+    pricing: {
+      inputPerMillion: '$0.15',
+      outputPerMillion: '$0.60',
+    },
+  },
+  {
+    id: 'meta/llama-3.3-70b',
+    name: 'Llama 3.3 70B',
+    provider: 'meta',
+    description: 'High-performance open weights model with function calling capabilities.',
+    supportsVision: false,
+    supportsReasoning: false,
+    pricing: {
+      inputPerMillion: '$0.72',
+      outputPerMillion: '$0.72',
+    },
   },
 ];
 
-export const DEFAULT_MODEL_ID = 'anthropic/claude-3-5-sonnet';
+export const DEFAULT_MODEL_ID = 'openai/gpt-4o-mini';
 
 /**
  * Checks whether any real LLM provider credentials or Vercel AI Gateway are configured.
@@ -119,7 +151,7 @@ function createSimulatedModel(modelId: string): any {
 
             // Step 1: Check if the user prompt requests a tool execution
             if (step === 1) {
-              const reasonText = `1. Analyzed user request: "${userText}".\n2. Note: Operating in local demonstration mode (add AI_GATEWAY_API_KEY or provider key in .env.local for live LLMs).\n3. Determining appropriate harness tool...`;
+              const reasonText = `1. Analyzed user request: "${userText}".\n2. Selected budget model: ${modelId}.\n3. Operating in local demonstration mode (add AI_GATEWAY_API_KEY or provider key in .env.local for live LLMs).\n4. Executing harness tool...`;
 
               controller.enqueue({ type: 'reasoning-start', id: `r_${stepId}` });
               controller.enqueue({ type: 'reasoning-delta', id: `r_${stepId}`, delta: reasonText, text: reasonText });
@@ -211,7 +243,7 @@ function createSimulatedModel(modelId: string): any {
             }
 
             // Output text stream (step > 1 after tool results, or for direct query)
-            const responseText = `### Agent Response\n\nI have processed your request: **"${userText || 'Hello!'}"**.\n\n> **Local Demonstration Mode**:\n> To connect live model providers, create a \`.env.local\` file in \`agentic-chat-harness/\` and add:\n> \`\`\`bash\n> AI_GATEWAY_API_KEY=your_key_here\n> # Or direct provider keys:\n> ANTHROPIC_API_KEY=your_anthropic_key\n> OPENAI_API_KEY=your_openai_key\n> \`\`\`\n\nAll tools (E2B microVM / client sandboxes, Neon pgvector memory, file uploads) are fully operational. Try asking me to run Python code or store a rule!`;
+            const responseText = `### Agent Response\n\nI have processed your request: **"${userText || 'Hello!'}"** using budget model **\`${modelId}\`**.\n\n> **Local Demonstration Mode**:\n> To connect live model providers, create a \`.env.local\` file in \`agentic-chat-harness/\` and add:\n> \`\`\`bash\n> AI_GATEWAY_API_KEY=your_key_here\n> # Or direct provider keys:\n> OPENAI_API_KEY=your_openai_key\n> ANTHROPIC_API_KEY=your_anthropic_key\n> \`\`\`\n\nAll tools (E2B microVM / client sandboxes, Neon pgvector memory, file uploads) are fully operational. Try asking me to run Python code or store a rule!`;
 
             controller.enqueue({ type: 'text-start', id: `t_${stepId}` });
             controller.enqueue({ type: 'text-delta', id: `t_${stepId}`, delta: responseText, text: responseText });
@@ -239,7 +271,7 @@ export function resolveModel(modelId: string) {
   const modelSpec = AVAILABLE_MODELS.find((m) => m.id === modelId) || AVAILABLE_MODELS[0];
 
   // 1. If Vercel AI Gateway is available
-  if (process.env.AI_GATEWAY_API_KEY || (process.env.VERCEL_ENV && !process.env.ANTHROPIC_API_KEY)) {
+  if (process.env.AI_GATEWAY_API_KEY || (process.env.VERCEL_ENV && !process.env.OPENAI_API_KEY)) {
     try {
       return gateway(modelSpec.id);
     } catch (e) {
@@ -250,12 +282,12 @@ export function resolveModel(modelId: string) {
   // 2. Direct provider fallback if individual API keys exist in environment
   const [provider, modelName] = modelSpec.id.split('/');
 
-  if (provider === 'anthropic' && process.env.ANTHROPIC_API_KEY) {
-    return anthropic(modelName);
-  }
-
   if (provider === 'openai' && process.env.OPENAI_API_KEY) {
     return openai(modelName);
+  }
+
+  if (provider === 'anthropic' && process.env.ANTHROPIC_API_KEY) {
+    return anthropic(modelName);
   }
 
   if (provider === 'google' && (process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY)) {
