@@ -72,3 +72,4 @@ export async function verifySessionToken(token?: string | null): Promise<boolean
     return false;
   }
 }
+
