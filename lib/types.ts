@@ -30,7 +30,7 @@ export interface SandboxExecutionResult {
   }>;
   exitCode: number;
   durationMs: number;
-  sandboxType: 'e2b-microvm' | 'client-fallback';
+  sandboxType: 'vercel-sandbox' | 'client-fallback';
   error?: string;
 }
 

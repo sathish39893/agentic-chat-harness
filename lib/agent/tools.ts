@@ -9,10 +9,10 @@ export function createHarnessTools(options?: {
   forceFallbackSandbox?: boolean;
 }) {
   return {
-    // 1. Code Execution Sandbox Tool (E2B Cloud MicroVM or Client/Fallback)
+    // 1. Code Execution Sandbox Tool (Vercel Sandbox MicroVM or Client/Fallback)
     executeCode: tool({
       description:
-        'Executes Python, Bash, or JavaScript in an isolated execution sandbox. Use for computation, data manipulation, file generation, or running shell commands.',
+        'Executes Python, Bash, or JavaScript in an isolated execution sandbox (powered by Vercel Sandbox Firecracker microVMs). Use for computation, data manipulation, file generation, or running shell commands.',
       inputSchema: z.object({
         language: z
           .enum(['python', 'bash', 'javascript'])

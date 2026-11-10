@@ -41,14 +41,14 @@ export function ChatInterface() {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [systemStatus, setSystemStatus] = useState<{
     hasGateway?: boolean;
-    hasE2B?: boolean;
+    hasSandbox?: boolean;
     hasNeon?: boolean;
   }>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Fetch runtime model metadata and gateway/e2b/neon availability
+  // Fetch runtime model metadata and gateway/sandbox/neon availability
   useEffect(() => {
     fetch('/api/models')
       .then((res) => res.json())
@@ -169,7 +169,7 @@ export function ChatInterface() {
               </span>
             </div>
             <p className="text-[11px] text-zinc-400">
-              Vercel AI SDK • E2B Sandbox • Neon pgvector
+              Vercel AI SDK • Vercel Sandbox • Neon pgvector
             </p>
           </div>
         </div>
@@ -193,10 +193,10 @@ export function ChatInterface() {
                 ? 'bg-amber-500/10 text-amber-300 border-amber-500/30 shadow-xs'
                 : 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 border-white/10 hover:border-white/20 shadow-xs'
             }`}
-            title="Toggle between E2B Cloud MicroVM and Client Fallback Sandbox"
+            title="Toggle between Vercel Sandbox MicroVM and Client Fallback Sandbox"
           >
             <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{forceFallbackSandbox ? 'Client Sandbox' : 'E2B MicroVM'}</span>
+            <span>{forceFallbackSandbox ? 'Client Sandbox' : 'Vercel Sandbox'}</span>
           </button>
 
           {/* Neon Memory Drawer Button */}
@@ -265,7 +265,7 @@ export function ChatInterface() {
                     <span>Monte Carlo Simulation & Chart</span>
                   </div>
                   <p className="text-zinc-400 text-[11px] leading-relaxed">
-                    Executes Python in E2B microVM and returns rendered Matplotlib visual plot.
+                    Executes Python in Vercel Sandbox microVM and returns rendered Matplotlib visual plot.
                   </p>
                 </button>
 

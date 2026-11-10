@@ -243,7 +243,7 @@ function createSimulatedModel(modelId: string): any {
             }
 
             // Output text stream (step > 1 after tool results, or for direct query)
-            const responseText = `### Agent Response\n\nI have processed your request: **"${userText || 'Hello!'}"** using budget model **\`${modelId}\`**.\n\n> **Local Demonstration Mode**:\n> To connect live model providers, create a \`.env.local\` file in \`agentic-chat-harness/\` and add:\n> \`\`\`bash\n> AI_GATEWAY_API_KEY=your_key_here\n> # Or direct provider keys:\n> OPENAI_API_KEY=your_openai_key\n> ANTHROPIC_API_KEY=your_anthropic_key\n> \`\`\`\n\nAll tools (E2B microVM / client sandboxes, Neon pgvector memory, file uploads) are fully operational. Try asking me to run Python code or store a rule!`;
+            const responseText = `### Agent Response\n\nI have processed your request: **"${userText || 'Hello!'}"** using budget model **\`${modelId}\`**.\n\n> **Local Demonstration Mode**:\n> To connect live model providers, create a \`.env.local\` file in \`agentic-chat-harness/\` and add:\n> \`\`\`bash\n> AI_GATEWAY_API_KEY=your_key_here\n> # Or direct provider keys:\n> OPENAI_API_KEY=your_openai_key\n> ANTHROPIC_API_KEY=your_anthropic_key\n> \`\`\`\n\nAll tools (Vercel Sandbox microVM / client sandboxes, Neon pgvector memory, file uploads) are fully operational. Try asking me to run Python code or store a rule!`;
 
             controller.enqueue({ type: 'text-start', id: `t_${stepId}` });
             controller.enqueue({ type: 'text-delta', id: `t_${stepId}`, delta: responseText, text: responseText });

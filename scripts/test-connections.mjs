@@ -20,13 +20,15 @@ if (gatewayKey) {
   console.log(`    - Google:    ${googleKey ? '✔ Configured' : '✖ Missing'}`);
 }
 
-// 2. Check E2B MicroVM Sandbox
-const e2bKey = process.env.E2B_API_KEY;
-console.log('\n[Sandbox Engine]');
-if (e2bKey) {
-  console.log('  ✔ E2B API Key detected. Cloud MicroVM sandboxes active.');
+// 2. Check Vercel Sandbox (Firecracker microVM)
+const vercelOidc = process.env.VERCEL_OIDC_TOKEN;
+const vercelToken = process.env.VERCEL_TOKEN;
+console.log('\n[Sandbox Engine (Vercel Sandbox)]');
+if (vercelOidc || vercelToken) {
+  console.log('  ✔ Vercel Sandbox credentials detected. Cloud MicroVMs active.');
 } else {
-  console.log('  ℹ E2B_API_KEY not set. Safe local client fallback sandbox will be used.');
+  console.log('  ℹ Vercel Sandbox credentials not set (set VERCEL_TOKEN or link via vercel env pull).');
+  console.log('  ℹ Safe local client fallback sandbox will be used.');
 }
 
 // 3. Check Vercel Blob

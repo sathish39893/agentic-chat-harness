@@ -3,12 +3,31 @@ import { SandboxExecutionResult } from '@/lib/types';
 /**
  * Sandboxing Orchestrator
  * Supports:
- * 1. E2B Cloud MicroVM Sandbox (@e2b/code-interpreter) for full Linux / Python / Bash execution on Vercel
- * 2. Secure local / client fallback when E2B is not configured or client-side mode is preferred
+ * 1. Vercel Sandbox (@vercel/sandbox) for isolated Linux Firecracker MicroVM execution on Vercel
+ * 2. Secure local / client fallback when Vercel Sandbox credentials are not configured or client-side mode is preferred
  */
 export class SandboxManager {
-  private static hasE2B(): boolean {
-    return Boolean(process.env.E2B_API_KEY && process.env.E2B_API_KEY.trim() !== '');
+  /**
+   * Check whether Vercel Sandbox credentials or deployment environment are available.
+   * Prevents interactive CLI prompts when running in automated or serverless environments.
+   */
+  private static hasSandboxCredentials(): boolean {
+    if (process.env.VERCEL_OIDC_TOKEN && process.env.VERCEL_OIDC_TOKEN.trim() !== '') {
+      return true;
+    }
+    if (
+      process.env.VERCEL_TOKEN &&
+      process.env.VERCEL_TOKEN.trim() !== '' &&
+      process.env.VERCEL_PROJECT_ID &&
+      process.env.VERCEL_TEAM_ID
+    ) {
+      return true;
+    }
+    // Automatically available inside deployed Vercel functions with OIDC enabled
+    if (process.env.VERCEL === '1' && process.env.VERCEL_ENV) {
+      return true;
+    }
+    return false;
   }
 
   public static async execute({
@@ -22,42 +41,80 @@ export class SandboxManager {
   }): Promise<SandboxExecutionResult> {
     const startTime = Date.now();
 
-    // 1. Primary: E2B Cloud MicroVM Sandbox
-    if (this.hasE2B() && !forceFallback) {
+    // 1. Primary: Vercel Sandbox (Firecracker MicroVM)
+    if (this.hasSandboxCredentials() && !forceFallback) {
       try {
-        const { Sandbox } = await import('@e2b/code-interpreter');
+        const { Sandbox } = await import('@vercel/sandbox');
+
+        const credentials =
+          process.env.VERCEL_TOKEN && process.env.VERCEL_PROJECT_ID && process.env.VERCEL_TEAM_ID
+            ? {
+                token: process.env.VERCEL_TOKEN,
+                projectId: process.env.VERCEL_PROJECT_ID,
+                teamId: process.env.VERCEL_TEAM_ID,
+              }
+            : undefined;
+
         const sandbox = await Sandbox.create({
-          apiKey: process.env.E2B_API_KEY,
+          ...(credentials || {}),
+          timeout: 60_000,
         });
 
         try {
-          const execution = await sandbox.runCode(code, {
-            language: language === 'bash' ? 'bash' : 'python',
-          });
-          const durationMs = Date.now() - startTime;
-
+          let stdout = '';
+          let stderr = '';
+          let exitCode = 0;
           const results: SandboxExecutionResult['results'] = [];
-          for (const r of execution.results || []) {
-            if (r.png) {
-              results.push({
-                type: 'image',
-                content: `data:image/png;base64,${r.png}`,
-              });
-            } else if (r.html) {
-              results.push({
-                type: 'html',
-                content: r.html,
-              });
-            } else if (r.text) {
-              results.push({
-                type: 'text',
-                content: r.text,
-              });
+
+          if (language === 'python') {
+            await sandbox.writeFiles([
+              {
+                path: 'script.py',
+                content: code,
+              },
+            ]);
+
+            const run = await sandbox.runCommand('python3', ['script.py'], { timeoutMs: 30_000 });
+            exitCode = run.exitCode;
+            stdout = await run.stdout();
+            stderr = await run.stderr();
+
+            // Check for commonly generated figures/charts
+            for (const imgName of ['plot.png', 'output.png', 'chart.png', 'figure.png']) {
+              try {
+                const imgBuffer = await sandbox.readFileToBuffer({ path: imgName });
+                if (imgBuffer && imgBuffer.length > 0) {
+                  results.push({
+                    type: 'image',
+                    content: `data:image/png;base64,${imgBuffer.toString('base64')}`,
+                  });
+                  break;
+                }
+              } catch {
+                // Ignore missing file
+              }
             }
+          } else if (language === 'javascript') {
+            await sandbox.writeFiles([
+              {
+                path: 'script.mjs',
+                content: code,
+              },
+            ]);
+
+            const run = await sandbox.runCommand('node', ['script.mjs'], { timeoutMs: 30_000 });
+            exitCode = run.exitCode;
+            stdout = await run.stdout();
+            stderr = await run.stderr();
+          } else {
+            // Bash
+            const run = await sandbox.runCommand('bash', ['-c', code], { timeoutMs: 30_000 });
+            exitCode = run.exitCode;
+            stdout = await run.stdout();
+            stderr = await run.stderr();
           }
 
-          const stdout = execution.logs?.stdout ? execution.logs.stdout.join('\n') : '';
-          const stderr = execution.logs?.stderr ? execution.logs.stderr.join('\n') : '';
+          const durationMs = Date.now() - startTime;
 
           return {
             language,
@@ -65,16 +122,16 @@ export class SandboxManager {
             stdout,
             stderr,
             results,
-            exitCode: execution.error ? 1 : 0,
+            exitCode,
             durationMs,
-            sandboxType: 'e2b-microvm',
-            error: execution.error ? `${execution.error.name}: ${execution.error.value}` : undefined,
+            sandboxType: 'vercel-sandbox',
+            error: exitCode !== 0 ? stderr || `Command exited with code ${exitCode}` : undefined,
           };
         } finally {
-          await sandbox.kill().catch(() => {});
+          await sandbox.stop().catch(() => {});
         }
       } catch (err) {
-        console.warn('E2B Sandbox execution failed, falling back to local runner:', err);
+        console.warn('Vercel Sandbox execution failed or not linked, falling back to local runner:', err);
       }
     }
 
@@ -135,7 +192,7 @@ export class SandboxManager {
         if (code.includes('plt.show') || code.includes('matplotlib')) {
           results.push({
             type: 'text',
-            content: '[Matplotlib figure rendered successfully]',
+            content: '[Matplotlib figure simulated in client fallback sandbox]',
           });
         }
       } else {

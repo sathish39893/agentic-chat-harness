@@ -11,7 +11,7 @@ const inMemoryStore: MemoryRecord[] = [
   },
   {
     id: 'sample-2',
-    content: 'Project stack: Next.js 16, Vercel AI SDK, Neon pgvector, E2B microVMs.',
+    content: 'Project stack: Next.js 16, Vercel AI SDK, Neon pgvector, Vercel Sandbox microVMs.',
     category: 'context',
     createdAt: new Date().toISOString(),
   },

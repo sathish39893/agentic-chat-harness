@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Agentic Chat Harness | Vercel AI SDK',
   description:
-    'Full-stack agentic chat application featuring E2B MicroVM sandboxes, Neon pgvector long-term memory, and multi-model routing via Vercel AI Gateway.',
+    'Full-stack agentic chat application featuring Vercel Sandbox microVMs, Neon pgvector long-term memory, and multi-model routing via Vercel AI Gateway.',
 };
 
 export default function RootLayout({

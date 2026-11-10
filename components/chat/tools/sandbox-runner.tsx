@@ -65,12 +65,12 @@ export function SandboxRunner({ state, args, result }: SandboxRunnerProps) {
             {result && (
               <span
                 className={`px-2 py-0.5 rounded-full text-[10px] font-mono border ${
-                  result.sandboxType === 'e2b-microvm'
+                  result.sandboxType === 'vercel-sandbox'
                     ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
                     : 'bg-zinc-800 text-zinc-400 border-zinc-700'
                 }`}
               >
-                {result.sandboxType === 'e2b-microvm' ? '⚡ E2B MicroVM' : '💻 Client Fallback'}
+                {result.sandboxType === 'vercel-sandbox' ? '▲ Vercel Sandbox' : '💻 Client Fallback'}
               </span>
             )}
           </div>
