@@ -1,7 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Database, BrainCircuit, Sparkles, Check } from 'lucide-react';
+import { Database, BrainCircuit, Sparkles, Check, Bookmark, Layers } from 'lucide-react';
+import {
+  Card,
+  CardText,
+  Fields,
+  Field,
+  Section,
+  Actions,
+  Button,
+} from '@/components/chat-sdk';
 
 interface MemoryBadgeProps {
   toolName: 'storeMemory' | 'searchMemory';
@@ -16,26 +25,33 @@ export function MemoryBadge({ toolName, state, args, result }: MemoryBadgeProps)
     const category = args?.category || 'fact';
 
     return (
-      <div className="my-2 p-2.5 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-xs flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Database className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="font-semibold text-emerald-300">Neon pgvector:</span>
-          <span className="text-zinc-200">"{content}"</span>
-          <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 font-mono">
-            {category}
-          </span>
-        </div>
-        <div className="flex items-center gap-1 text-emerald-400 text-[11px] font-medium">
-          {state === 'call' ? (
-            <span className="animate-pulse">Storing...</span>
-          ) : (
-            <>
-              <Check className="w-3 h-3" />
-              <span>Persisted</span>
-            </>
-          )}
-        </div>
-      </div>
+      <Card
+        title="Neon pgvector Memory Persisted"
+        subtitle="Long-term semantic context store"
+        badge={state === 'call' ? 'Storing...' : 'Persisted'}
+        badgeVariant="emerald"
+        width="full"
+        className="my-2.5 border-emerald-500/20 bg-emerald-950/15"
+      >
+        <Fields columns={2}>
+          <Field
+            label="Category"
+            value={category.toUpperCase()}
+            icon={<Bookmark className="w-3 h-3 text-emerald-400" />}
+          />
+          <Field
+            label="Vector Engine"
+            value="Neon Postgres (<=>)"
+            icon={<Database className="w-3 h-3 text-emerald-400" />}
+          />
+        </Fields>
+
+        <Section className="bg-emerald-950/30 border-emerald-500/10">
+          <CardText style="bold" className="text-emerald-200">
+            "{content}"
+          </CardText>
+        </Section>
+      </Card>
     );
   }
 
@@ -44,35 +60,45 @@ export function MemoryBadge({ toolName, state, args, result }: MemoryBadgeProps)
     const count = result?.memories?.length ?? 0;
 
     return (
-      <div className="my-2 p-2.5 rounded-xl border border-sky-500/30 bg-sky-950/20 text-xs space-y-1.5">
-        <div className="flex items-center justify-between text-sky-400">
-          <div className="flex items-center gap-1.5 font-medium">
-            <BrainCircuit className="w-3.5 h-3.5" />
-            <span>Queried Neon Memory:</span>
-            <span className="text-zinc-200 font-mono italic">"{query}"</span>
-          </div>
-          <span className="text-[11px] font-mono">{count} recalled</span>
-        </div>
+      <Card
+        title="Semantic Memory Search"
+        subtitle={`Queried: "${query}"`}
+        badge={`${count} Recalled`}
+        badgeVariant="blue"
+        width="full"
+        className="my-2.5 border-sky-500/20 bg-sky-950/15"
+      >
+        <Fields columns={2}>
+          <Field
+            label="Query"
+            value={query}
+            icon={<BrainCircuit className="w-3 h-3 text-sky-400" />}
+          />
+          <Field
+            label="Matches Found"
+            value={`${count} semantic records`}
+            icon={<Layers className="w-3 h-3 text-sky-400" />}
+          />
+        </Fields>
 
         {result?.memories && result.memories.length > 0 && (
-          <div className="space-y-1 pt-1">
+          <Section className="bg-sky-950/30 border-sky-500/10 space-y-1.5">
             {result.memories.map((m: any) => (
               <div
                 key={m.id}
-                className="p-1.5 rounded bg-zinc-900/60 border border-zinc-800 text-[11px] text-zinc-300 flex items-center justify-between"
+                className="p-2 rounded-lg bg-zinc-900/60 border border-white/5 flex items-center justify-between text-xs"
               >
-                <span>• {m.content}</span>
-                <span className="text-[10px] text-sky-400 font-mono">
+                <span className="text-zinc-200 truncate">• {m.content}</span>
+                <span className="text-[10px] text-sky-400 font-mono font-medium shrink-0 ml-2">
                   {m.similarity ? `${Math.round(m.similarity * 100)}% match` : m.category}
                 </span>
               </div>
             ))}
-          </div>
+          </Section>
         )}
-      </div>
+      </Card>
     );
   }
 
   return null;
 }
-

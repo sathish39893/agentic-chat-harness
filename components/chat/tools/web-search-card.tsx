@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Search, ExternalLink, Globe } from 'lucide-react';
+import { Search, Globe, ExternalLink } from 'lucide-react';
+import { Card, Section, CardLink, Divider, CardText } from '@/components/chat-sdk';
 
 interface WebSearchCardProps {
   state: 'call' | 'result';
@@ -14,39 +15,42 @@ interface WebSearchCardProps {
 
 export function WebSearchCard({ state, args, result }: WebSearchCardProps) {
   const query = args?.query || result?.query || '';
+  const count = result?.sources?.length ?? 0;
 
   return (
-    <div className="my-2.5 rounded-xl border border-blue-500/30 bg-blue-950/20 p-3 text-xs">
-      <div className="flex items-center gap-2 text-blue-400 font-medium mb-1.5">
-        <Search className="w-3.5 h-3.5" />
-        <span>Web Knowledge Search:</span>
-        <span className="text-zinc-200 font-mono italic">"{query}"</span>
-        {state === 'call' && <span className="animate-pulse text-blue-400">Searching...</span>}
-      </div>
+    <Card
+      title="Web Knowledge Search"
+      subtitle={`Query: "${query}"`}
+      badge={state === 'call' ? 'Searching...' : `${count} Sources Found`}
+      badgeVariant="blue"
+      width="full"
+      className="my-2.5 border-blue-500/20 bg-blue-950/15"
+    >
+      {state === 'call' && (
+        <CardText style="muted" className="italic text-blue-300">
+          Fetching search citations and live references...
+        </CardText>
+      )}
 
       {result?.sources && result.sources.length > 0 && (
-        <div className="mt-2 space-y-1.5">
+        <Section className="space-y-2">
           {result.sources.map((src, idx) => (
-            <a
+            <div
               key={idx}
-              href={src.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block p-2 rounded-lg bg-zinc-900/80 border border-zinc-800 hover:border-blue-500/50 transition-colors group"
+              className="p-2.5 rounded-lg bg-zinc-900/70 border border-white/5 space-y-1 hover:border-blue-500/30 transition-all"
             >
-              <div className="flex items-center justify-between text-blue-300 font-medium group-hover:underline">
-                <span className="flex items-center gap-1.5 truncate">
-                  <Globe className="w-3 h-3 text-zinc-400" />
+              <div className="flex items-center justify-between">
+                <CardLink url={src.url} className="text-xs font-semibold text-blue-300">
                   {src.title}
-                </span>
-                <ExternalLink className="w-3 h-3 text-zinc-500 group-hover:text-blue-400" />
+                </CardLink>
               </div>
-              <p className="text-zinc-400 text-[11px] mt-0.5 line-clamp-2">{src.snippet}</p>
-            </a>
+              <p className="text-zinc-400 text-[11px] leading-relaxed line-clamp-2">
+                {src.snippet}
+              </p>
+            </div>
           ))}
-        </div>
+        </Section>
       )}
-    </div>
+    </Card>
   );
 }
-

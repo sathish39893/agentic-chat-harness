@@ -172,7 +172,7 @@ export function ChatInterface() {
               </span>
             </div>
             <p className="text-[11px] text-zinc-400">
-              Vercel AI SDK • Vercel Sandbox • Neon pgvector
+              Vercel AI SDK • Chat SDK UI • Vercel Sandbox • Neon pgvector
             </p>
           </div>
         </div>

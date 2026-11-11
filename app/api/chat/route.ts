@@ -40,7 +40,17 @@ export async function POST(req: Request) {
     });
 
     // 3. Convert client UIMessages to standard ModelMessages for streamText
-    const modelMessages = await convertToModelMessages(messages);
+    const normalizedMessages = messages.map((m: any) => {
+      if (!m.parts && typeof m.content === 'string') {
+        return {
+          ...m,
+          parts: [{ type: 'text', text: m.content }],
+        };
+      }
+      return m;
+    });
+
+    const modelMessages = await convertToModelMessages(normalizedMessages);
 
     // Multimodal Vision Injection for Vision-capable models
     if (attachments && attachments.length > 0) {
