@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, UIMessage } from 'ai';
 import ReactMarkdown from 'react-markdown';
@@ -33,6 +34,7 @@ import {
 } from 'lucide-react';
 
 export function ChatInterface() {
+  const router = useRouter();
   const [selectedModelId, setSelectedModelId] = useState(DEFAULT_MODEL_ID);
   const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
   const [forceFallbackSandbox, setForceFallbackSandbox] = useState(false);
@@ -141,7 +143,8 @@ export function ChatInterface() {
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
-      window.location.href = '/login';
+      router.push('/login');
+      router.refresh();
     } catch (e) {
       console.error('Logout error:', e);
     }
