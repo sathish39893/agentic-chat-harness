@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Sparkles, ArrowRight, Loader2, ShieldCheck, KeyRound, AlertCircle } from 'lucide-react';
+import { Lock, Sparkles, ArrowRight, Loader2, KeyRound, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const [password, setPassword] = useState('');
@@ -114,22 +114,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Quick hint for initial setup */}
-          <div className="pt-2 border-t border-white/5 space-y-2 text-[11px] text-zinc-400">
-            <div className="flex items-start gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-              <div>
-                <span className="text-zinc-300 font-medium">Default Passcode:</span>{' '}
-                <code className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 font-mono text-[10px]">
-                  agentic-2026
-                </code>
-                <p className="text-[10px] text-zinc-500 mt-0.5">
-                  Customize via <code className="text-zinc-400">APP_PASSWORD</code> in your environment variables.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Vercel Deployment Protection Guide Card */}
